@@ -21,53 +21,33 @@ class Route
     [@first] + @interim + [@last]
   end
 
-  def length
+  def count
     2 + @interim.count
-  end
-
-  def station(index)
-    cnt = @interim.length
-    if index.negative?
-      nil
-    elsif index.zero?
-      @first
-    elsif index <= cnt
-      @interim[index - 1]
-    elsif index == cnt + 1
-      @last
-    end
   end
 end
 
 class Train
   attr_reader :serial, :speed, :type, :wagon_count
 
+  # the easiest way to implement enums that i found
   module Types
-    PASSENGER = 0
-    CARGO = 1
+    PASSENGER = Class.new
+    CARGO = Class.new
   end
 
   def initialize(serial, type, wagon_count)
-    @serial          = serial
-    @type            = type
-    @speed           = 0.0
-    @wagon_count     = wagon_count
-    @route           = nil
-    @current_station = -1
+    @serial      = serial
+    @type        = type
+    @speed       = 0.0
+    @wagon_count = wagon_count
   end
 
   def go_next
-    if @route
-      throw 'train was on the last station' if @current_station + 1 == @route.length
+    return unless next_station
 
-      prev_station = @route.station(@current_station)
-      prev_station&.delete_train(self)
-      @current_station += 1
-      next_station = @route.station(@current_station)
-      next_station&.add_train(self)
-    else
-      throw "Train #{serial} has no route"
-    end
+    current_station.delete_train(self)
+    @current_station_index += 1
+    current_station.add_train(self)
   end
 
   def running
@@ -99,20 +79,25 @@ class Train
   def route=(route)
     @route = route
     @route.first.add_train(self)
-    @current_station = -1
-    go_next # go to the first station
+    @current_station_index = 0
   end
 
   def prev_station
-    @route.station(@current_station - 1)
+    # if we are in the first station
+    return nil if @current_station_index <= 0
+
+    @route.stations[@current_station_index - 1]
   end
 
   def next_station
-    @route.station(@current_station + 1)
+    # if we are in the last station
+    return nil if @current_station_index >= @route.count - 1
+
+    @route.stations[@current_station_index + 1]
   end
 
   def current_station
-    @route.station(@current_station)
+    @route.stations[@current_station_index]
   end
 end
 
@@ -145,8 +130,6 @@ class Station
   end
 
   def send_train
-    throw 'trains length was 0' if @trains.length.zero?
-
     current_train = @trains[0]
     @trains.shift
     current_train.go_next
