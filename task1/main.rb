@@ -20,10 +20,6 @@ class Route
   def stations
     [@first] + @interim + [@last]
   end
-
-  def count
-    2 + @interim.count
-  end
 end
 
 class Train
@@ -63,15 +59,13 @@ class Train
   end
 
   def add_wagon
-    throw "Train #{serial} was running" if running
+    return nil if running
 
     @wagon_count += 1
   end
 
   def remove_wagon
-    throw "Train #{serial} was running" if running
-
-    throw "Train #{serial} had 0 wagons" if @wagon_count.zero?
+    return nil if running || @wagon_count.zero?
 
     @wagon_count -= 1
   end
@@ -91,7 +85,7 @@ class Train
 
   def next_station
     # if we are in the last station
-    return nil if @current_station_index >= @route.count - 1
+    return nil if @current_station_index >= @route.stations.count - 1
 
     @route.stations[@current_station_index + 1]
   end
