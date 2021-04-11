@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-class CargoWagon
-  @type = :cargo
-  def initialize; end
+require_relative 'wagon'
+
+class CargoWagon < Wagon
+  def type
+    :cargo
+  end
 end

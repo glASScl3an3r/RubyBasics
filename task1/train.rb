@@ -1,15 +1,20 @@
 # frozen_string_literal: true
 
 class Train
-  attr_reader :serial, :speed, :type, :wagons
+  attr_reader :serial, :speed, :wagons
 
-  TYPES = %i[passenger cargo].freeze
-
-  def initialize(serial, type)
+  def initialize(serial)
     @serial      = serial
     @speed       = 0.0
-    @type        = (TYPES.include? type) ? type : nil
     @wagons      = []
+  end
+
+  def type
+    nil
+  end
+
+  def add_wagon(wagon)
+    @wagons.push(wagon) if wagon.type != type
   end
 
   def go_next
