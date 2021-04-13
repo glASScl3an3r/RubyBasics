@@ -21,10 +21,6 @@ class Train
     register_instance
   end
 
-  def type
-    nil
-  end
-
   def add_wagon(wagon)
     @wagons.push(wagon) if wagon.type != type
   end
