@@ -1,12 +1,24 @@
 # frozen_string_literal: true
 
+require_relative 'producer'
+require_relative 'instance_counter'
+
 class Train
+  include Producer
+  include InstanceCounter
+
   attr_reader :serial, :speed, :wagons
+
+  def self.find(serial)
+    all.detect {|train| train.serial == serial }
+  end
 
   def initialize(serial)
     @serial      = serial
     @speed       = 0.0
     @wagons      = []
+
+    register_instance
   end
 
   def type
