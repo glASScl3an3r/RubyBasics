@@ -2,11 +2,11 @@
 
 module Producer
   def producer=(prod)
-    self.prod = prod
+    @prod = prod.to_s
   end
 
   def producer
-    prod
+    @prod
   end
 
   protected

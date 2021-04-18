@@ -205,7 +205,7 @@ class Interface
       puts "No train with serial #{serial}"
     else
       puts "Train #{cur_train.serial} : type - #{cur_train.type}, "\
-           "producer - #{cur_train.producer}, speed - #{cur_train.speed}, wagons:"
+           "producer - #{cur_train.producer || "unknown"}, speed - #{cur_train.speed}, wagons:"
 
       if cur_train.wagons.count.zero?
         puts 'this train is empty'
