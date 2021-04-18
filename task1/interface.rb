@@ -19,30 +19,35 @@ class Interface
     help
 
     loop do
-      # create train1 p -> ['create', 'train1', 'p'] - create train with name train1 and passenger type
-      input = gets.chomp.split(' ')
+      begin
+        # create train1 p -> ['create', 'train1', 'p'] - create train with name train1 and passenger type
+        input = gets.chomp.split(' ')
 
-      case input[0]
-      when 'exit'
-        puts 'good bye!'
-        break
-      when 'h'
-        help
-        puts
-      when '1'
-        puts 'stations menu. Type your commands'
-        menu_number = 1
-      when '2'
-        puts 'trains menu. Type your commands'
-        menu_number = 2
-      when '3'
-        puts 'routes menu. Type your commands'
-        menu_number = 3
-      when 'back'
-        puts 'choose menu: 1(stations) 2(trains) 3(routes)'
-        menu_number = 0
-      else
-        menu_actions(input, menu_number)
+        case input[0]
+        when 'exit'
+          puts 'good bye!'
+          break
+        when 'h'
+          help
+          puts
+        when '1'
+          puts 'stations menu. Type your commands'
+          menu_number = 1
+        when '2'
+          puts 'trains menu. Type your commands'
+          menu_number = 2
+        when '3'
+          puts 'routes menu. Type your commands'
+          menu_number = 3
+        when 'back'
+          puts 'choose menu: 1(stations) 2(trains) 3(routes)'
+          menu_number = 0
+        else
+          menu_actions(input, menu_number)
+        end
+      rescue RuntimeError => e
+        print e.inspect
+        puts 'repeat your command with correct args'
       end
     end
   end
@@ -88,7 +93,14 @@ class Interface
     when 'create'
       create_train(input[1], input[2])
     when 'print'
-      print_trains_list
+      case input.length
+      when 1
+        print_trains_list
+      when 2
+        print_train(input[1])
+      else
+        invalid
+      end
     when 'set'
       set_train_route(input[1], input[2])
     when 'go'
@@ -123,6 +135,7 @@ class Interface
 
   def create_station(station_name)
     @stations[station_name] = Station.new(station_name)
+    puts "station with name #{station_name} created"
   end
 
   def create_train(train_serial, str_type)
@@ -131,10 +144,12 @@ class Interface
                             else
                               CargoTrain.new(train_serial)
                             end
+    puts "train with serial #{train_serial} and #{@trains[train_serial].type} type created"
   end
 
   def create_route(route_name, first, last)
     @routes[route_name] = Route.new(@stations[first], @stations[last])
+    puts "route with name #{route_name} created"
   end
 
   def add_station_to_route(route_name, station_name)
@@ -151,31 +166,53 @@ class Interface
 
   def add_wagon(train_serial, count)
     (1..count).each { |_i| @trains[train_serial].add_wagon(PassengerWagon.new); }
+    puts "hooked #{count} wagons to train #{train_serial}"
   end
 
   def remove_wagon(train_serial, count)
-    #remove count wagons from train back
+    # remove count wagons from train back
     (1..count).each { |i| @trains[train_serial].remove_wagon(@trains[train_serial].wagons.count - i); }
+    puts "removed #{count} wagons from train #{train_serial}"
   end
 
   def train_go(train_serial, direction)
     if direction == 'forward'
       @trains[train_serial].go_next
+      puts "train #{train_serial} passed ahead"
     else
       @trains[train_serial].go_back
+      puts "train #{train_serial} passed back"
     end
   end
 
   def print_station_list
     puts 'stations:'
+    puts 'no stations here' if @stations.empty?
     @stations.each_key { |station_name| print("#{station_name} ") }
     puts
   end
 
   def print_trains_list
     puts 'trains:'
+    puts 'no trains here' if @trains.empty?
     @trains.each_key { |train_serial| print("#{train_serial} ") }
     puts
+  end
+
+  def print_train(serial)
+    cur_train = Train.find(serial)
+    if cur_train.nil?
+      puts "No train with serial #{serial}"
+    else
+      puts "Train #{cur_train.serial} : type - #{cur_train.type}, "\
+           "producer - #{cur_train.producer}, speed - #{cur_train.speed}, wagons:"
+
+      if cur_train.wagons.count.zero?
+        puts 'this train is empty'
+      else
+        puts "this train contains #{cur_train.wagons.count} wagons"
+      end
+    end
   end
 
   def print_routes_list
@@ -208,6 +245,7 @@ class Interface
     puts '2 - to go to Train commands list:'
     puts "    create [train_serial] [type] - to create train with serial [train_serial] and type 'p'/'c' (passenger or cargo)"
     puts '    print - to print all trains serials'
+    puts '    print [serial] - to print info about train with serial [serial]'
     puts '    set [train_serial] [route_name] - to set route with name [route_name] to train with serial [train_serial]'
     puts "    go [train_serial] [direction] - to move train with serial [train_serial] 'forward'/'back'"
     puts '    back - to go back'

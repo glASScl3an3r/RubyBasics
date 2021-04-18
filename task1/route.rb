@@ -11,8 +11,16 @@ class Route
     @first = first_station
     @interim = []
     @last = last_station
-    
+
+    validate!
+
     register_instance
+  end
+
+  def valid?
+    validate!
+  rescue StandardError
+    false
   end
 
   def add_station(station)
@@ -25,5 +33,15 @@ class Route
 
   def stations
     [@first] + @interim + [@last]
+  end
+
+  protected
+
+  def validate!
+    stations.each do |station|
+      raise 'first, last and interim elements must be a Station instances' if station.class != Station
+    end
+
+    true
   end
 end

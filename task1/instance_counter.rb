@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module InstanceCounter
   module ClassMethods
     attr_accessor :insts
@@ -13,7 +15,7 @@ module InstanceCounter
     end
 
     def instances
-      self.insts.count
+      insts.count
     end
 
     def add_instance(instance)
