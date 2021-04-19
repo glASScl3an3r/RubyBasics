@@ -29,6 +29,10 @@ class Train
     false
   end
 
+  def foreach_wagon(&block)
+    @wagons.each(&block)
+  end
+
   def add_wagon(wagon)
     @wagons.push(wagon) if !running? && wagon.type == type
   end

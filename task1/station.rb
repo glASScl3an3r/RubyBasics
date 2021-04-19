@@ -22,6 +22,10 @@ class Station
     false
   end
 
+  def foreach_train(type, &block)
+    trains(type).each(&block)
+  end
+
   def add_train(train)
     @trains.push(train)
   end
