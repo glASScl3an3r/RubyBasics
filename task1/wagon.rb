@@ -4,8 +4,4 @@ require_relative 'producer'
 
 class Wagon
   include Producer
-  
-  def type
-    nil
-  end
 end

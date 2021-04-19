@@ -11,7 +11,15 @@ class Station
     @name = name
     @trains = []
 
+    validate!
+
     register_instance
+  end
+
+  def valid?
+    validate!
+  rescue StandardError
+    false
   end
 
   def add_train(train)
@@ -32,5 +40,17 @@ class Station
     current_train = @trains[0]
     @trains.shift
     current_train.go_next
+  end
+
+  protected
+
+  def validate!
+    raise 'name must be a string' if @name.class != String
+
+    @trains.each do |train|
+      raise 'trains elements must be a Train instances' if train.class != Train
+    end
+
+    true
   end
 end
