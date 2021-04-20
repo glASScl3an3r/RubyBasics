@@ -14,12 +14,6 @@ class PassengerWagon < Wagon
     validate!
   end
 
-  def valid?
-    validate!
-  rescue StandardError
-    false
-  end
-
   def take_seat
     @seats_busy += 1 if @seats_busy < @seats_count
   end

@@ -14,12 +14,6 @@ class CargoWagon < Wagon
     validate!
   end
 
-  def valid?
-    validate!
-  rescue StandardError
-    false
-  end
-
   def take_volume(volume)
     @used_volume = [@used_volume + volume, @max_volume].min
   end
