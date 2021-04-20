@@ -45,7 +45,7 @@ class Interface
         else
           menu_actions(input, menu_number)
         end
-      rescue RuntimeError => e
+      rescue StandardError => e
         print e.inspect
         puts 'repeat your command with correct args'
       end
@@ -109,6 +109,10 @@ class Interface
       add_wagon(input[1], input[2].to_i)
     when 'rm'
       add_wagon(input[1], input[2].to_i)
+    when 'takeseat'
+      take_seat(input[1], input[2].to_i)
+    when 'takevolume'
+      take_volume(input[1], input[2].to_i, input[3].to_f)
     else
       invalid
     end
@@ -165,8 +169,14 @@ class Interface
   end
 
   def add_wagon(train_serial, count)
-    (1..count).each { |_i| @trains[train_serial].add_wagon(PassengerWagon.new); }
-    puts "hooked #{count} wagons to train #{train_serial}"
+    cur_train = @trains[train_serial]
+
+    (1..count).each do |i|
+      puts "wagon #{i}: " + ((cur_train.type == :passenger)? "type seats count:" : "type max volume")
+      input = gets.chomp
+      new_wagon = ((cur_train.type == :passenger)? PassengerWagon.new(input.to_i) : CargoWagon.new(input.to_f))
+      cur_train.add_wagon(new_wagon)
+    end
   end
 
   def remove_wagon(train_serial, count)
@@ -210,7 +220,15 @@ class Interface
       if cur_train.wagons.count.zero?
         puts 'this train is empty'
       else
-        puts "this train contains #{cur_train.wagons.count} wagons"
+        puts "this train contains #{cur_train.wagons.count} wagons:"
+        cur_wagon = 0
+        cur_train.foreach_wagon do |wagon|
+          if wagon.type == :cargo
+            puts "wagon #{cur_wagon += 1}: free - #{wagon.free_volume} m^3, used - #{wagon.occupied_volume} m^3"
+          elsif wagon.type == :passenger
+            puts "wagon #{cur_wagon += 1}: free - #{wagon.free_seats} seats, busy - #{wagon.busy_seats} seats"
+          end
+        end
       end
     end
   end
@@ -227,10 +245,31 @@ class Interface
     current_type = :passenger if str_type == 'p'
     current_type = :cargo if str_type == 'c'
 
-    @trains = @stations[station_name].trains(current_type)
+    @stations[station_name].foreach_train(current_type) do |train|
+      puts "train #{train.serial} with #{train.wagons.count} wagons"
+    end
 
-    @trains.each { |train| print("#{train.serial} ") }
     puts
+  end
+
+  def take_seat(serial, index)
+    cur_train = @trains[serial]
+    if cur_train.type != :passenger
+      puts "cant take a seat in non passenger train"
+    else
+      cur_train.wagons[index].take_seat
+      puts "done"
+    end
+  end
+
+  def take_volume(serial, index, volume)
+    cur_train = @trains[serial]
+    if cur_train.type != :cargo
+      puts "cant take a volume in non cargo train"
+    else
+      cur_train.wagons[index].take_volume(volume)
+      puts "done"
+    end
   end
 
   def help
@@ -246,11 +285,13 @@ class Interface
     puts "    create [train_serial] [type] - to create train with serial [train_serial] and type 'p'/'c' (passenger or cargo)"
     puts '    print - to print all trains serials'
     puts '    print [serial] - to print info about train with serial [serial]'
-    puts '    set [train_serial] [route_name] - to set route with name [route_name] to train with serial [train_serial]'
+    puts '    set [serial] [route_name] - to set route with name [route_name] to train with serial [serial]'
     puts "    go [train_serial] [direction] - to move train with serial [train_serial] 'forward'/'back'"
+    puts '    add [serial] [count]- to add [count] wagons to train [serial]'
+    puts '    rm [serial] [count]- to remove [count] wagons from train [serial]'
+    puts '    takeseat [serial] [index] - to take a seat in [index] wagon in train [serial]'
+    puts '    takevolume [serial] [index] [volume] - to take a volume in [index] wagon in train [serial]'
     puts '    back - to go back'
-    puts '    add [count[- to add [count] wagons'
-    puts '    rm [count]- to remove [count] wagons'
     puts '3 - to go to Route commands list:'
     puts '    create [route_name] [first_station] [last_station]- to create route with name [route_name],'
     puts '      first station at [first_station] and last station at [last_station]'
