@@ -9,7 +9,7 @@ class Train
   include Producer
   include InstanceCounter
   include Validation
-  extend Accessors
+  include Accessors
 
   strong_attr_accessor :serial, String
   attr_reader :speed, :wagons, :serial

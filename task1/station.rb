@@ -7,7 +7,7 @@ require_relative 'accessors'
 class Station
   include Validation
   include InstanceCounter
-  extend Accessors
+  include Accessors
 
   validate :name, String
   attr_accessor_with_history :name

@@ -23,29 +23,22 @@ module Validation
     private
 
     def validate(args)
-      var = instance_variable_get("@#{args[0]}".to_sym)
-
-      case args[1]
-      when :presence
-        valid_presence(args[0], var)
-      when :format
-        valid_format(args[0], var, args[2])
-      when :type
-        valid_type(args[0], var, args[2])
-      end
+      value = instance_variable_get("@#{args[0]}".to_sym)
+      #format: [variable_name, validation_type(may be useful), format||type||etc]
+      send("validate_#{args[1]}".to_sym, value, *args)
     end
 
-    def valid_presence(name, value)
+    def validate_presence(value, name, _valid_type)
       raise "#{name} was nil" if value.nil?
       raise "#{name} was empty string" if value.empty?
     end
 
-    def valid_format(name, value, format)
+    def validate_format(value, name, _valid_type, format)
       raise "#{name} does not match the format #{format}" if value !~ format
     end
 
-    def valid_type(_name, value, type)
-      raise "#value was #{value.class}, but should have been #{type}" if value.class != type
+    def validate_type(value, name, _valid_type, type)
+      raise "#{name} was #{value.class}, but should have been #{type}" if value.class != type
     end
   end
 
