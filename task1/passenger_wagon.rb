@@ -1,8 +1,14 @@
 # frozen_string_literal: true
 
 require_relative 'wagon'
+require_relative 'validation'
 
 class PassengerWagon < Wagon
+  include Validation
+
+  validate :seats_count, Integer
+  validate :seats_busy, Integer
+
   def type
     :passenger
   end
@@ -24,16 +30,5 @@ class PassengerWagon < Wagon
 
   def busy_seats
     @seats_busy
-  end
-
-  protected
-
-  attr_accessor :seats_count, :seats_busy
-
-  def validate!
-    raise "seats_count must be an Integer" if @seats_count.class != Integer
-    raise "seats_count must be greater then 0" if @seats_count <= 0
-    raise "seats_busy cant be greater then seats_count" if @seats_busy > @seats_count
-    true
   end
 end

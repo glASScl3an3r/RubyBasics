@@ -2,12 +2,22 @@
 
 require_relative 'producer'
 require_relative 'instance_counter'
+require_relative 'validation'
+require_relative 'accessors'
 
 class Train
   include Producer
   include InstanceCounter
+  include Validation
+  include Accessors
 
-  attr_reader :serial, :speed, :wagons
+  strong_attr_accessor :serial, String
+  attr_reader :speed, :wagons, :serial
+
+  validate :serial, :type, String
+  validate :serial, :presence
+  validate :serial, :format, /\A[0-9A-Za-z]{3}-{0,1}[0-9A-Za-z]{2}\z/
+  validate :speed, :type, Float
 
   def self.find(serial)
     all.detect { |train| train.serial == serial }
@@ -21,12 +31,6 @@ class Train
     validate!
 
     register_instance
-  end
-
-  def valid?
-    validate!
-  rescue StandardError
-    false
   end
 
   def foreach_wagon(&block)
@@ -91,26 +95,5 @@ class Train
 
   def current_station
     @route.stations[@current_station_index]
-  end
-
-  protected
-
-  def validate!
-    # 3 chars or digits then nothing or - then 2 chars or digits
-    regexp = /\A[0-9A-Za-z]{3}-{0,1}[0-9A-Za-z]{2}\z/
-
-    raise 'serial must be a string' if @serial.class != String
-
-    if @serial !~ regexp
-      raise 'serial must be 3 digits or characters '\
-            'followed by an optional dash then 2 characters or digits. '\
-            'Examples: ab1-a2, 1b1as'
-    end
-
-    @wagons.each do |wagon|
-      raise 'wagons must be of the same type as trains' if wagon.type != type
-    end
-
-    true
   end
 end

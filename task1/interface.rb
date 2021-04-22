@@ -172,9 +172,9 @@ class Interface
     cur_train = @trains[train_serial]
 
     (1..count).each do |i|
-      puts "wagon #{i}: " + ((cur_train.type == :passenger)? "type seats count:" : "type max volume")
+      puts "wagon #{i}: " + (cur_train.type == :passenger ? 'type seats count:' : 'type max volume')
       input = gets.chomp
-      new_wagon = ((cur_train.type == :passenger)? PassengerWagon.new(input.to_i) : CargoWagon.new(input.to_f))
+      new_wagon = (cur_train.type == :passenger ? PassengerWagon.new(input.to_i) : CargoWagon.new(input.to_f))
       cur_train.add_wagon(new_wagon)
     end
   end
@@ -215,7 +215,7 @@ class Interface
       puts "No train with serial #{serial}"
     else
       puts "Train #{cur_train.serial} : type - #{cur_train.type}, "\
-           "producer - #{cur_train.producer || "unknown"}, speed - #{cur_train.speed}, wagons:"
+           "producer - #{cur_train.producer || 'unknown'}, speed - #{cur_train.speed}, wagons:"
 
       if cur_train.wagons.count.zero?
         puts 'this train is empty'
@@ -223,9 +223,10 @@ class Interface
         puts "this train contains #{cur_train.wagons.count} wagons:"
         cur_wagon = 0
         cur_train.foreach_wagon do |wagon|
-          if wagon.type == :cargo
+          case wagon.type
+          when :cargo
             puts "wagon #{cur_wagon += 1}: free - #{wagon.free_volume} m^3, used - #{wagon.occupied_volume} m^3"
-          elsif wagon.type == :passenger
+          when :passenger
             puts "wagon #{cur_wagon += 1}: free - #{wagon.free_seats} seats, busy - #{wagon.busy_seats} seats"
           end
         end
@@ -255,20 +256,20 @@ class Interface
   def take_seat(serial, index)
     cur_train = @trains[serial]
     if cur_train.type != :passenger
-      puts "cant take a seat in non passenger train"
+      puts 'cant take a seat in non passenger train'
     else
       cur_train.wagons[index].take_seat
-      puts "done"
+      puts 'done'
     end
   end
 
   def take_volume(serial, index, volume)
     cur_train = @trains[serial]
     if cur_train.type != :cargo
-      puts "cant take a volume in non cargo train"
+      puts 'cant take a volume in non cargo train'
     else
       cur_train.wagons[index].take_volume(volume)
-      puts "done"
+      puts 'done'
     end
   end
 

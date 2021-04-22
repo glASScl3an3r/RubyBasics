@@ -1,8 +1,14 @@
 # frozen_string_literal: true
 
 require_relative 'wagon'
+require_relative 'validation'
 
 class CargoWagon < Wagon
+  include Validation
+
+  validate :max_volume, :type, Float
+  validate :used_volume, :type, Float
+
   def type
     :cargo
   end
@@ -24,16 +30,5 @@ class CargoWagon < Wagon
 
   def occupied_volume
     @used_volume
-  end
-
-  protected
-
-  attr_accessor :max_volume, :used_volume
-
-  def validate!
-    raise "max_volume must be a float" if @max_volume.class != Float
-    raise "used_volume cant be less then zero" if @used_volume.negative?
-    raise "used_volume cant be greater then max_volume" if @used_volume > @max_volume
-    true
   end
 end

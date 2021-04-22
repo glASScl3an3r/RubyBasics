@@ -1,11 +1,18 @@
 # frozen_string_literal: true
 
 require_relative 'instance_counter'
+require_relative 'validation'
+require_relative 'station'
 
 class Route
   include InstanceCounter
+  include Validation
 
-  attr_accessor :first, :last, :interim
+  validate :first, :type, Station
+  validate :last, :type, Station
+  validate :interim, :type, Array
+
+  attr_reader :first, :last
 
   def initialize(first_station, last_station)
     @first = first_station
@@ -15,12 +22,6 @@ class Route
     validate!
 
     register_instance
-  end
-
-  def valid?
-    validate!
-  rescue StandardError
-    false
   end
 
   def add_station(station)
@@ -33,15 +34,5 @@ class Route
 
   def stations
     [@first] + @interim + [@last]
-  end
-
-  protected
-
-  def validate!
-    stations.each do |station|
-      raise 'first, last and interim elements must be a Station instances' if station.class != Station
-    end
-
-    true
   end
 end
